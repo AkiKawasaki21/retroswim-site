@@ -1,4 +1,4 @@
-/* Retro Swim site. Palette and fonts come from the game (game/src/autoload/ui.gd). */
+/* Flip Turn site (formerly Retro Swim). Palette and fonts come from the game (game/src/autoload/ui.gd). */
 
 @font-face {
   font-family: "Jersey 10";
@@ -43,6 +43,12 @@
   --lane-white: #f1f1f1;
   --lane-blue: #2156a8;
 
+  /* The game's logo colours (title.gd). */
+  --logo-ink: #0a1226;
+  --logo-drop: #1b9fe0;
+  --logo-lane: #5cc8ff;
+  --logo-cap: #ff5a4f;
+
   --font-display: "Jersey 10", "Silkscreen", ui-monospace, monospace;
   --font-caps: "Silkscreen", ui-monospace, monospace;
   --font-pixel: "Tiny5", "Silkscreen", ui-monospace, monospace;
@@ -51,7 +57,7 @@
   --text-sm: 0.9375rem;
   --text-base: 1.0625rem;
   --text-h2: clamp(2.5rem, 1.9rem + 3vw, 4rem);
-  --text-logo: clamp(3.75rem, 1.8rem + 10vw, 9.5rem);
+  --text-logo: clamp(2.75rem, 0.6rem + 11.2vw, 7rem);   /* FLIP TURN is 5.9em wide in Silkscreen: fits 320 px */
 
   --gutter: 16px;
   --radius: 3px;
@@ -266,39 +272,90 @@ a:hover {
   box-shadow: 0 4px 0 var(--bg-deep);
 }
 
-/* Two layers: an outlined dark copy underneath, a banded gold fill on top. */
+/* The game's wordmark (game/src/ui/screens/title.gd): white Silkscreen letters on a cyan drop with a
+   navy outline. Two layers: the outlined cyan copy underneath, shifted down; the white face on top. */
 .logo {
+  --lo: calc(1em / 24);   /* one outline step: 2 game units at the game's 48 px logo */
   position: relative;
   isolation: isolate;
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-caps);
   font-weight: 400;
   font-size: var(--text-logo);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
+  line-height: 1;
+  letter-spacing: 0;
 }
 .logo::before {
   content: attr(data-text);
   position: absolute;
   inset: 0;
   z-index: -1;
-  color: var(--ink);
-  text-shadow: 0 -0.05em 0 var(--ink), 0.05em 0 0 var(--ink), -0.05em 0 0 var(--ink),
-    0.05em 0.05em 0 var(--ink), -0.05em 0.05em 0 var(--ink), 0.05em -0.05em 0 var(--ink),
-    -0.05em -0.05em 0 var(--ink), 0 0.1em 0 var(--ink), 0.05em 0.1em 0 var(--ink),
-    -0.05em 0.1em 0 var(--ink), 0 0.16em 0 rgb(0 0 0 / 0.45);
+  color: var(--logo-drop);
+  transform: translateY(var(--lo));
+  text-shadow: var(--lo) 0 0 var(--logo-ink), calc(-1 * var(--lo)) 0 0 var(--logo-ink),
+    var(--lo) var(--lo) 0 var(--logo-ink), calc(-1 * var(--lo)) var(--lo) 0 var(--logo-ink),
+    0 var(--lo) 0 var(--logo-ink), var(--lo) calc(-1 * var(--lo)) 0 var(--logo-ink),
+    calc(-1 * var(--lo)) calc(-1 * var(--lo)) 0 var(--logo-ink), 0 calc(-2 * var(--lo)) 0 var(--logo-ink),
+    0 calc(3 * var(--lo)) 0 rgb(0 0 0 / 0.45);
 }
 .logo__fill {
-  display: inline-block;
-  background: linear-gradient(
-    180deg,
-    var(--gold-light) 0 30%,
-    var(--gold-art) 30% 62%,
-    #f0a326 62% 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #fff;
+}
+
+/* One lap of the pool under the wordmark: out to the wall, the turn, and back, with a red-capped
+   swimmer swimming it. u = one game unit; every piece gets its navy outline from the filter. */
+.logo-lap {
+  --u: calc(var(--text-logo) / 48);
+  --lap-w: calc(var(--text-logo) * 5.7);
+  position: relative;
+  width: var(--lap-w);
+  height: calc(var(--u) * 10);
+  margin: calc(var(--u) * 6) auto 0;
+  filter: drop-shadow(var(--u) 0 0 var(--logo-ink)) drop-shadow(calc(-1 * var(--u)) 0 0 var(--logo-ink))
+    drop-shadow(0 var(--u) 0 var(--logo-ink)) drop-shadow(0 calc(-1 * var(--u)) 0 var(--logo-ink));
+}
+.logo-lap::before {       /* out lane plus the wall: a cyan bracket open at the bottom left */
+  content: "";
+  position: absolute;
+  left: calc(var(--u) * 8);
+  top: 0;
+  width: calc(var(--lap-w) - var(--u) * 8);
+  height: calc(var(--u) * 8);
+  border-top: calc(var(--u) * 2) solid var(--logo-lane);
+  border-right: calc(var(--u) * 2) solid var(--logo-lane);
+}
+.logo-lap::after {        /* back lane, ending in an arrowhead pointing home */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(var(--u) * 4);
+  width: calc(var(--lap-w) - var(--u) * 2);
+  height: calc(var(--u) * 6);
+  background: #fff;
+  clip-path: polygon(0 50%, calc(var(--u) * 6) 0, calc(var(--u) * 6) 33.34%, 100% 33.34%, 100% 66.66%,
+    calc(var(--u) * 6) 66.66%, calc(var(--u) * 6) 100%);
+}
+.logo-lap__dot {          /* the swimmer: out, down the wall, home */
+  position: absolute;
+  left: calc(var(--u) * 8);
+  top: 0;
+  z-index: 1;
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 2);
+  background: var(--logo-cap);
+  animation: ft-lap 4s linear infinite;
+}
+@keyframes ft-lap {
+  0% { transform: translate(0, 0); }
+  45% { transform: translate(calc(var(--lap-w) - var(--u) * 13), 0); }
+  55% { transform: translate(calc(var(--lap-w) - var(--u) * 13), calc(var(--u) * 6)); }
+  100% { transform: translate(calc(var(--u) * -2), calc(var(--u) * 6)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-lap__dot {
+    animation: none;
+    transform: translate(calc(var(--lap-w) - var(--u) * 13), 0);
+  }
 }
 
 .hero__tagline {
@@ -342,7 +399,7 @@ a:hover {
 .shots {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: min(66vw, 260px);
+  grid-auto-columns: min(86vw, 560px);   /* landscape captures, 1200 x 552 */
   gap: 12px;
   margin: 0;
   padding: 4px var(--gutter) 1.25rem;
@@ -368,7 +425,7 @@ a:hover {
 @media (min-width: 960px) {
   .shots {
     grid-auto-flow: row;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     width: min(100% - 2 * var(--gutter), 1120px);
     margin-inline: auto;

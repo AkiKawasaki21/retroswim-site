@@ -1,6 +1,6 @@
 # retroswim-site
 
-Static site for the iOS game **Retro Swim**, served by GitHub Pages from `main` (root).
+Static site for the iOS game **Flip Turn** (formerly Retro Swim; the repo and URLs keep the old name), served by GitHub Pages from `main` (root).
 
 - Home: https://akikawasaki21.github.io/retroswim-site/
 - Privacy Policy: https://akikawasaki21.github.io/retroswim-site/privacy/
